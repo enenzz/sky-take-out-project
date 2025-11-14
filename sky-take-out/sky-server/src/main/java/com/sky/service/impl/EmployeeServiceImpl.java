@@ -115,4 +115,25 @@ public class EmployeeServiceImpl implements EmployeeService {
         return new PageResult(total, records);
     }
 
+    /**
+     * 设置员工账号状态
+     * @param status
+     * @param id
+     */
+    @Override
+    public void startOrStop(Integer status, Long id) {
+        //将参数封装到实体类中
+        Employee employee = new Employee();
+        employee.setStatus(status);
+        employee.setId(id);
+        employee.setUpdateTime(LocalDateTime.now());
+
+        //获取当前线程的id值
+        Long updateUser = BaseContext.getCurrentId();
+        employee.setUpdateUser(updateUser);
+
+        //调用持久层来修改员工账号状态
+        employeeMapper.update(employee);
+    }
+
 }

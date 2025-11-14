@@ -95,4 +95,17 @@ public class EmployeeController {
         return Result.success(pageResult);
     }
 
+    /**
+     * 设置员工账号状态
+     * @param status
+     * @param id
+     * @return
+     */
+    @PostMapping("/status/{status}")
+    public Result startOrStop(@PathVariable Integer status, Long id) {
+        log.info("将员工账号状态设置为： {}，员工id： {}", status, id);
+        employeeService.startOrStop(status, id);
+        return Result.success();
+    }
+
 }
