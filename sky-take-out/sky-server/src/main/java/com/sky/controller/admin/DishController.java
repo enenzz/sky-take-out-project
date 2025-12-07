@@ -80,10 +80,28 @@ public class DishController {
         return Result.success();
     }
 
+    /**
+     * 菜品启售禁售
+     * @param status
+     * @param id
+     * @return
+     */
     @PostMapping("/status/{status}")
     public Result startOrStop(@PathVariable Integer status,Long id) {
         log.info("菜品启用禁用: 状态 {} id {}", status, id);
         dishService.startOrStop(status, id);
         return Result.success();
+    }
+
+    /**
+     * 根据分类id查询菜品
+     * @param categoryId
+     * @return
+     */
+    @GetMapping("/list")
+    public Result<List<DishVO>> getByCategoryId(@RequestParam Long categoryId) {
+        log.info("菜品的分类id: {}", categoryId);
+        List<DishVO> dishLish = dishService.getByCategoryId(categoryId);
+        return Result.success(dishLish);
     }
 }

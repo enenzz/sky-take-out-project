@@ -40,9 +40,15 @@ public class SetmealServiceImpl implements SetmealService {
         //向套餐表插入一条数据
         setmealMapper.insert(setmeal);
 
-        //向套餐与菜品关系表插入多条数据
+        //插入sql语句返回的套餐id
+        Long setmealId = setmeal.getId();
+
+        //向套餐菜品关系表插入多条数据
         List<SetmealDish> setmealDishes = setmealDTO.getSetmealDishes();
         if (setmealDishes != null && setmealDishes.size() > 0) {
+            //为套餐菜品关系表设置套餐id
+            setmealDishes.forEach(setmealDish ->
+                    setmealDish.setSetmealId(setmealId));
             setmealDishMapper.insertBatch(setmealDishes);
         }
     }
@@ -55,7 +61,8 @@ public class SetmealServiceImpl implements SetmealService {
     @Override
     public PageResult pageQuery(SetmealPageQueryDTO setmealPageQueryDTO) {
         //开启分页查询
-        PageHelper.startPage(setmealPageQueryDTO.getPage(), setmealPageQueryDTO.getPageSize());
+        PageHelper.startPage(setmealPageQueryDTO.getPage(),
+                setmealPageQueryDTO.getPageSize());
         Page<SetmealVO> page = setmealMapper.pageQuery(setmealPageQueryDTO);
         return new PageResult(page.getTotal(), page.getResult());
     }
