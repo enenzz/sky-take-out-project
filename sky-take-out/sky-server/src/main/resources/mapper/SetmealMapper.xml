@@ -8,7 +8,7 @@
             (#{categoryId}, #{name}, #{price}, #{description}, #{image}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
     </insert>
 
-    <select id="getByIds" resultType="Setmeal">
+    <select id="getByIds" resultType="com.sky.entity.Setmeal">
         select * from setmeal where id in
         <foreach collection="setmealIds" open="(" close=")" separator="," item="id">
             #{id}
@@ -28,4 +28,14 @@
             <if test="updateUser != null">update_user = #{updateUser},</if>
         </set>
     </update>
+
+    <select id="pageQuery" resultType="com.sky.vo.SetmealVO">
+        select s.*, c.name category_name from setmeal s left join category c on s.category_id = c.id
+        <where>
+            <if test="name != null">and s.name like concat('%', #{name}, '%')</if>
+            <if test="categoryId != null">and s.category_id = #{categoryId}</if>
+            <if test="status != null">and s.status = #{status}</if>
+        </where>
+        order by s.create_time desc
+    </select>
 </mapper>
