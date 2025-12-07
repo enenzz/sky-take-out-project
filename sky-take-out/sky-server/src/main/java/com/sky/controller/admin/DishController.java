@@ -79,4 +79,11 @@ public class DishController {
         dishService.updateWithFlavor(dishDTO);
         return Result.success();
     }
+
+    @PostMapping("/status/{status}")
+    public Result startOrStop(@PathVariable Integer status,Long id) {
+        log.info("菜品启用禁用: 状态 {} id {}", status, id);
+        dishService.startOrStop(status, id);
+        return Result.success();
+    }
 }
