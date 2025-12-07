@@ -32,9 +32,9 @@ public interface SetmealMapper {
 
     /**
      * 根据id集合查询套餐
-     * @param setmealIds
+     * @param ids
      */
-    List<Setmeal> getBySetmealIds(List<Long> setmealIds);
+    List<Setmeal> getByIds(List<Long> ids);
 
     /**
      * 修改套餐信息
@@ -49,4 +49,18 @@ public interface SetmealMapper {
      * @return
      */
     Page<SetmealVO> pageQuery(SetmealPageQueryDTO setmealPageQueryDTO);
+
+    /**
+     * 根据id查询套餐
+     * @param id
+     * @return
+     */
+    @Select("select * from setmeal where id = #{id}")
+    Setmeal getById(Long id);
+
+    /**
+     * 根据id集合批量删除数据
+     * @param ids
+     */
+    void deleteByIds(List<Long> ids);
 }

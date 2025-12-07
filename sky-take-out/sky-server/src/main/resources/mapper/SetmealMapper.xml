@@ -10,7 +10,7 @@
 
     <select id="getByIds" resultType="com.sky.entity.Setmeal">
         select * from setmeal where id in
-        <foreach collection="setmealIds" open="(" close=")" separator="," item="id">
+        <foreach collection="ids" open="(" close=")" separator="," item="id">
             #{id}
         </foreach>
     </select>
@@ -38,4 +38,11 @@
         </where>
         order by s.create_time desc
     </select>
+
+    <delete id="deleteByIds">
+        delete from setmeal where id in
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
 </mapper>
