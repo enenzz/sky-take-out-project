@@ -197,4 +197,29 @@ public class DishServiceImpl implements DishService {
         return dishMapper.getByCategoryId(categoryId);
     }
 
+    /**
+     * 条件查询菜品和口味
+     * @param dish
+     * @return
+     */
+    @Override
+    public List<DishVO> listWithFlavor(Dish dish) {
+        List<DishVO> dishList = dishMapper.getByCategoryId(dish.getCategoryId());
+
+        List<DishVO> list = new ArrayList<>();
+
+        for (DishVO d : dishList) {
+            DishVO dishVO = new DishVO();
+            BeanUtils.copyProperties(d,dishVO);
+
+            //根据菜品id查询对应的口味
+            List<DishFlavor> flavors = dishFlavorsMapper.getByDishId(d.getId());
+
+            dishVO.setFlavors(flavors);
+            list.add(dishVO);
+        }
+
+        return list;
+    }
+
 }
