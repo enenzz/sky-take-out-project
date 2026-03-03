@@ -107,13 +107,15 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         //获取该商品详细信息
         List<ShoppingCart> list = shoppingCartMapper.list(shoppingCart);
         shoppingCart = list.get(0);
-        Integer number = shoppingCart.getNumber();
-        if (number > 1) {
-            //商品数量为1时，减少购物车中该商品的数量
-            shoppingCart.setNumber(shoppingCart.getNumber() - 1);
-            shoppingCartMapper.updateNumberById(shoppingCart);
-        } else {
-            shoppingCartMapper.delete(shoppingCart);
+        if (list != null && list.size() > 0) {
+            Integer number = shoppingCart.getNumber();
+            if (number > 1) {
+                //商品数量为1时，减少购物车中该商品的数量
+                shoppingCart.setNumber(shoppingCart.getNumber() - 1);
+                shoppingCartMapper.updateNumberById(shoppingCart);
+            } else {
+                shoppingCartMapper.delete(shoppingCart);
+            }
         }
     }
 }
