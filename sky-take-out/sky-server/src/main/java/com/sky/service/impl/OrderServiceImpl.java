@@ -194,16 +194,22 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 查询订单详细信息
-     * @param id
+     * @param orderId
      * @return
      */
     @Override
-    public OrderVO showOrderDetail(Long id) {
-        OrderVO orderVO = new OrderVO();
-        Orders orders = orderMapper.getById(id);
-        BeanUtils.copyProperties(orders, orderVO);
+    public OrderVO showOrderDetail(Long orderId) {
+        //1.已知订单id，在订单表中查询订单信息
+        Orders orders = orderMapper.getById(orderId);
 
-        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(id);
+        //2.在订单详细表中查询
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orderId);
+
+        //3.将订单详细集合封装到list中
+        OrderVO orderVO = new OrderVO();
+
+        //4.所有数据封装到OrderVo中
+        BeanUtils.copyProperties(orders, orderVO);
         orderVO.setOrderDetailList(orderDetailList);
         return orderVO;
     }
@@ -302,6 +308,7 @@ public class OrderServiceImpl implements OrderService {
         }
         return orderStatisticsVO;
     }
+
 
     private String getOrderDishes(Orders orders) {
         //拼接菜品信息（菜品+口味+数量/套餐+数量）

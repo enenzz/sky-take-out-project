@@ -39,10 +39,10 @@ public interface OrderService {
 
     /**
      * 查询订单详细信息
-     * @param id
+     * @param orderId
      * @return
      */
-    OrderVO showOrderDetail(Long id);
+    OrderVO showOrderDetail(Long orderId);
 
     /**
      * 取消订单
