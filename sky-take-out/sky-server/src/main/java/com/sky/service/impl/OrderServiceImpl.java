@@ -19,6 +19,7 @@ import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -251,4 +252,42 @@ public class OrderServiceImpl implements OrderService {
             shoppingCartMapper.insert(shoppingCart);
         }
     }
+
+    /**
+     * 订单搜索
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO) {
+        PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
+        Page<Orders> page = orderMapper.pageQuery(ordersPageQueryDTO);
+
+        List<OrderVO> orderVOList = new ArrayList<>();
+        if (page != null && page.size() > 0) {
+            for (Orders orders: page) {
+                OrderVO orderVO = new OrderVO();
+                BeanUtils.copyProperties(orders, orderVO);
+                //获取菜品信息
+                orderVO.setOrderDishes(getOrderDishes(orders));
+                orderVOList.add(orderVO);
+            }
+        }
+        return new  PageResult(page.getTotal(), orderVOList);
+    }
+
+    private String getOrderDishes(Orders orders) {
+        //拼接菜品信息（菜品+口味+数量/套餐+数量）
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orders.getId());
+        StringBuilder sb = new StringBuilder();
+        for (OrderDetail orderDetail: orderDetailList) {
+            sb.append(orderDetail.getName());
+            if (orderDetail.getDishFlavor() != null) {
+                sb.append("-").append(orderDetail.getDishFlavor());
+            }
+            sb.append("-").append(orderDetail.getNumber()).append(";");
+        }
+        return sb.toString();
+    }
+
 }
