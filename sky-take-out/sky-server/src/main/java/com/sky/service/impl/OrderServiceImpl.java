@@ -17,6 +17,7 @@ import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
+import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 import org.aspectj.weaver.ast.Or;
@@ -276,6 +277,32 @@ public class OrderServiceImpl implements OrderService {
         return new  PageResult(page.getTotal(), orderVOList);
     }
 
+    /**
+     * 各个状态的订单数量统计
+     * @return
+     */
+    @Override
+    public OrderStatisticsVO statistics() {
+        //1.从订单表获取所有订单
+        List<Orders> ordersList = orderMapper.getAll();
+        OrderStatisticsVO orderStatisticsVO = new OrderStatisticsVO();
+        //2.待派、派送中、待接单(遍历统计)
+        for (Orders orders: ordersList) {
+            Integer status = orders.getStatus();
+            if (status == Orders.CONFIRMED) {
+                //待派
+                orderStatisticsVO.setConfirmed(orderStatisticsVO.getConfirmed() + 1);
+            } else if (status == Orders.DELIVERY_IN_PROGRESS) {
+                //派送中
+                orderStatisticsVO.setDeliveryInProgress(orderStatisticsVO.getDeliveryInProgress() + 1);
+            } else if (status == Orders.TO_BE_CONFIRMED){
+                //待接单
+                orderStatisticsVO.setToBeConfirmed(orderStatisticsVO.getToBeConfirmed() + 1);
+            }
+        }
+        return orderStatisticsVO;
+    }
+
     private String getOrderDishes(Orders orders) {
         //拼接菜品信息（菜品+口味+数量/套餐+数量）
         List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orders.getId());
@@ -285,7 +312,7 @@ public class OrderServiceImpl implements OrderService {
             if (orderDetail.getDishFlavor() != null) {
                 sb.append("-").append(orderDetail.getDishFlavor());
             }
-            sb.append("-").append(orderDetail.getNumber()).append(";");
+            sb.append("*").append(orderDetail.getNumber()).append(";");
         }
         return sb.toString();
     }
