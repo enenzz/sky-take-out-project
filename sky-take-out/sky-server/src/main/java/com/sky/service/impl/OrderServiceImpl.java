@@ -75,7 +75,8 @@ public class OrderServiceImpl implements OrderService {
         orders.setUserId(userId);
         orders.setOrderTime(LocalDateTime.now());
         orders.setPayStatus(Orders.UN_PAID);
-        orders.setAddress(addressBook.getDetail());
+        String address = addressBook.getProvinceName() + addressBook.getCityName() + addressBook.getDistrictName();
+        orders.setAddress(address);
         orders.setStatus(Orders.PENDING_PAYMENT);
         orders.setPhone(addressBook.getPhone());
         orders.setConsignee(addressBook.getConsignee());
@@ -203,5 +204,33 @@ public class OrderServiceImpl implements OrderService {
         List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(id);
         orderVO.setOrderDetailList(orderDetailList);
         return orderVO;
+    }
+
+    /**
+     * 取消订单
+     */
+    @Override
+    public void cancelOrder(Long orderId) {
+//        待支付和待接单状态下，用户可直接取消订单
+//        商家已接单状态下，用户取消订单需电话沟通商家
+//        派送中状态下，用户取消订单需电话沟通商家
+//        如果在待接单状态下取消订单，需要给用户退款
+//        取消订单后需要将订单状态修改为“已取消”
+
+        //获取订单的状态
+        Orders orders = orderMapper.getById(orderId);
+
+        //处理异常情况
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        if (orders.getStatus() > 2) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        orders.setStatus(Orders.CANCELLED); //订单状态修改为“已取消”
+        orders.setCancelReason("用户取消");
+        orders.setCancelTime(LocalDateTime.now());
+        orderMapper.update(orders);
     }
 }
