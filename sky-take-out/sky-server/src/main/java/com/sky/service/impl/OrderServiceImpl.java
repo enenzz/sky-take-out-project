@@ -5,9 +5,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
-import com.sky.dto.OrdersPageQueryDTO;
-import com.sky.dto.OrdersPaymentDTO;
-import com.sky.dto.OrdersSubmitDTO;
+import com.sky.dto.*;
 import com.sky.entity.*;
 import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.OrderBusinessException;
@@ -307,6 +305,79 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         return orderStatisticsVO;
+    }
+
+    /**
+     * 接单
+     * @param orderId
+     */
+    @Override
+    public void confirm(Long orderId) {
+        //1.将订单状态修改为已接单
+        Orders orders = orderMapper.getById(orderId);
+        orders.setStatus(Orders.CONFIRMED);
+        orderMapper.update(orders);
+    }
+
+    /**
+     * 派送订单
+     * @param id
+     */
+    @Override
+    public void delivery(Long id) {
+        //1.获取当前订单
+        Orders orders = orderMapper.getById(id);
+        //2.修改订单状态
+        orders.setStatus(Orders.DELIVERY_IN_PROGRESS);
+        //3，更新数据库
+        orderMapper.update(orders);
+    }
+
+    /**
+     * 拒单
+     * @param ordersRejectionDTO
+     */
+    @Override
+    public void rejection(OrdersRejectionDTO ordersRejectionDTO) {
+        //1.获取当前订单
+        Orders orders = orderMapper.getById(ordersRejectionDTO.getId());
+
+        //2.将订单状态改为取消
+        orders.setStatus(Orders.CANCELLED);
+
+        //3.添加取消原因
+        orders.setRejectionReason(ordersRejectionDTO.getRejectionReason());
+
+        //3.更新数据库
+        orderMapper.update(orders);
+    }
+
+    /**
+     * 商家取消订单
+     * @param ordersCancelDTO
+     */
+    @Override
+    public void cancel(OrdersCancelDTO ordersCancelDTO) {
+        //1.获取订单
+        Orders orders = orderMapper.getById(ordersCancelDTO.getId());
+
+        //2.添加原因和修改订单状态
+        orders.setCancelReason(ordersCancelDTO.getCancelReason());
+        orders.setStatus(Orders.CANCELLED);
+
+        //3.更新数据库
+        orderMapper.update(orders);
+    }
+
+    /**
+     * 完成订单
+     * @param orderId
+     */
+    @Override
+    public void complete(Long orderId) {
+        Orders orders = orderMapper.getById(orderId);
+        orders.setStatus(Orders.COMPLETED);
+        orderMapper.update(orders);
     }
 
 
