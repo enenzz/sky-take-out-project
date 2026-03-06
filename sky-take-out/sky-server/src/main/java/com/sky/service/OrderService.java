@@ -95,4 +95,10 @@ public interface OrderService {
      * @param orderId
      */
     void complete(Long orderId);
+
+    /**
+     * 客户催单
+     * @param id
+     */
+    void remindre(Long id);
 }

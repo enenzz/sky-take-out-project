@@ -331,6 +331,10 @@ public class OrderServiceImpl implements OrderService {
     public void confirm(Long orderId) {
         //1.将订单状态修改为已接单
         Orders orders = orderMapper.getById(orderId);
+        //校验订单是否存在
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
         orders.setStatus(Orders.CONFIRMED);
         orderMapper.update(orders);
     }
@@ -343,6 +347,10 @@ public class OrderServiceImpl implements OrderService {
     public void delivery(Long id) {
         //1.获取当前订单
         Orders orders = orderMapper.getById(id);
+        //校验订单是否存在
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
         //2.修改订单状态
         orders.setStatus(Orders.DELIVERY_IN_PROGRESS);
         //3，更新数据库
@@ -357,6 +365,10 @@ public class OrderServiceImpl implements OrderService {
     public void rejection(OrdersRejectionDTO ordersRejectionDTO) {
         //1.获取当前订单
         Orders orders = orderMapper.getById(ordersRejectionDTO.getId());
+        //校验订单是否存在
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
 
         //2.将订单状态改为取消
         orders.setStatus(Orders.CANCELLED);
@@ -376,6 +388,10 @@ public class OrderServiceImpl implements OrderService {
     public void cancel(OrdersCancelDTO ordersCancelDTO) {
         //1.获取订单
         Orders orders = orderMapper.getById(ordersCancelDTO.getId());
+        //校验订单是否存在
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
 
         //2.添加原因和修改订单状态
         orders.setCancelReason(ordersCancelDTO.getCancelReason());
@@ -392,8 +408,30 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void complete(Long orderId) {
         Orders orders = orderMapper.getById(orderId);
+        //校验订单是否存在
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
         orders.setStatus(Orders.COMPLETED);
         orderMapper.update(orders);
+    }
+
+    /**
+     * 客户催单
+     * @param id
+     */
+    @Override
+    public void remindre(Long id) {
+        Orders orders = orderMapper.getById(id);
+        //校验订单是否存在
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        Map map = new HashMap<>();
+        map.put("type", 2);
+        map.put("orderId", id);
+        map.put("content", "订单号: " + orders.getNumber());
+        webSocketServer.sendToAllClient(JSON.toJSONString(map));
     }
 
 
