@@ -15,18 +15,18 @@ import com.sky.mapper.*;
 import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
-import com.sky.vo.OrderPaymentVO;
-import com.sky.vo.OrderStatisticsVO;
-import com.sky.vo.OrderSubmitVO;
-import com.sky.vo.OrderVO;
+import com.sky.vo.*;
 import com.sky.websocket.WebSocketServer;
 import io.swagger.util.Json;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -432,6 +432,48 @@ public class OrderServiceImpl implements OrderService {
         map.put("orderId", id);
         map.put("content", "订单号: " + orders.getNumber());
         webSocketServer.sendToAllClient(JSON.toJSONString(map));
+    }
+
+    /**
+     * 营业额统计
+     * @param begin
+     * @param end
+     * @return
+     */
+    @Override
+    public TurnoverReportVO turnoverStatistics(LocalDate begin, LocalDate end) {
+        //1.查询数据的时间范围
+        //获取begin到end的时间，并封装到集合中
+        List<LocalDate> dateList = new ArrayList<>();
+        dateList.add(begin);
+        while (!begin.equals(end)) {
+            begin = begin.plusDays(1);
+            dateList.add(begin);
+        }
+
+
+        //2.获取每天的营业额
+        List<Double> turnoverList = new ArrayList<>();
+        for (LocalDate date: dateList) {
+            //获取当天最小时间和最大时间
+            LocalDateTime beginTime = LocalDateTime.of(date, LocalTime.MIN);
+            LocalDateTime endTime = LocalDateTime.of(date, LocalTime.MAX);
+
+            //查询数据库
+            Map map = new HashMap<>();
+            map.put("beginTime", beginTime);
+            map.put("endTime", endTime);
+            map.put("status", Orders.COMPLETED); //查询状态为已完成的订单
+            Double turnover = orderMapper.sumByMap(map);
+            turnover = turnover == null? 0.0: turnover; //若当天营业额无数据则置为0.0
+            turnoverList.add(turnover);
+        }
+
+        //封装数据并返回
+        return TurnoverReportVO.builder()
+                .dateList(StringUtils.join(dateList, ","))
+                .turnoverList(StringUtils.join(turnoverList, ","))
+                .build();
     }
 
 
